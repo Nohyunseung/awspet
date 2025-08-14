@@ -31,7 +31,7 @@
       ├─ src/
       │  ├─ screens/                  # 화면(오너/시터/공용)
       │  ├─ navigation/               # 네비게이션 스택/탭
-+      │  ├─ services/                # API 클라이언트 등
+      │  ├─ services/                # API 클라이언트 등
       │  ├─ store/                    # Zustand 스토어
       │  └─ types/                    # 타입 정의
       ├─ App.tsx
@@ -141,6 +141,18 @@ EXPO_PUBLIC_API_URL=http://localhost:3001
 
 자세한 파라미터/응답은 `backend/server/server.js` 참고.
 
+### 모바일 권한/사진 등록 안내
+
+- iOS 권한 문구는 `frontend/pet-buddy-ui/app.json`의 `ios.infoPlist`에 선언되어 있습니다.
+  - `NSCameraUsageDescription`: 카메라 접근 사유
+  - `NSPhotoLibraryUsageDescription`: 사진 보관함 접근 사유
+- Android 권한은 `frontend/pet-buddy-ui/app.json`의 `android.permissions`에 선언되어 있습니다.
+  - `android.permission.CAMERA`
+- 앱에서 반려견 사진은 두 가지 방식으로 등록할 수 있습니다.
+  - 앨범에서 선택: `expo-image-picker.launchImageLibraryAsync`
+  - 사진 촬영: `expo-image-picker.launchCameraAsync`
+- 촬영/선택된 이미지는 Base64(Data URI)로 서버에 전송하거나, S3 사전서명 URL(`POST /api/uploads/sign`)로 업로드 후 공개 URL을 사용하세요.
+
 ## 실시간 채팅(Socket.IO)
 
 클라이언트가 연결되면 다음 이벤트를 주고받습니다.
@@ -192,5 +204,9 @@ EXPO_PUBLIC_API_URL=http://localhost:3001
 ## 라이선스
 
 프로젝트 내부 정책에 따릅니다. 별도 라이선스 지정 전까지는 사내/개인 개발용으로만 사용하세요.
+
+
+
+
 
 

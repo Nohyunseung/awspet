@@ -68,6 +68,12 @@ docker run -d --name pet-mongo -p 27017:27017 -v mongo-data:/data/db mongo:6
 { "success": true, "dog": { "id": "dog-id", "user_id": "owner-id", "name": "Coco", "profile_image_url": "...", "breed": "Poodle", "personality": "Friendly", "birth_date": "2020-01-01", "special_notes": "Allergic" } }
 ```
 
+#### 사진 업로드/형식
+- `profile_image_url` 필드는 다음 형식을 지원합니다.
+  - 원격 URL(S3 등): `https://...`
+  - Data URI(Base64): `data:image/jpeg;base64,<...>` — 모바일에서 카메라 촬영/앨범 선택 이미지에 사용 가능
+- 대용량 업로드가 필요한 경우 `Uploads` 섹션의 사전서명 URL 발급 후 S3에 PUT 업로드한 뒤, 반환된 공개 URL을 `profile_image_url`로 전달하는 방식을 권장합니다.
+
 ### Sitter Postings
 | 메서드 | 경로 | 설명 |
 | - | - | - |
@@ -145,6 +151,10 @@ docker run -d --name pet-mongo -p 27017:27017 -v mongo-data:/data/db mongo:6
 // 200
 { "success": true, "uploadUrl": "https://s3-...", "key": "uploads/1690000000000_photo.jpg" }
 ```
+
+#### 모바일 사진 입력(클라이언트 참고)
+- 클라이언트(Expo/React Native)는 사진첩 선택과 카메라 촬영을 모두 지원합니다.
+- 촬영/선택된 이미지는 Base64(Data URI)로 `profile_image_url`에 직접 전송하거나, `uploads/sign`으로 S3 URL을 받아 업로드 후 해당 URL을 전송할 수 있습니다.
 
 ### 실시간 채팅 (Socket.IO)
 - 네임스페이스: 기본(`/`), CORS: 모든 오리진 허용

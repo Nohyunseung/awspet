@@ -717,6 +717,24 @@ const OwnerHomeScreen = ({ navigation }: any) => {
                   >
                     <Text style={{ color:'#374151' }}>앨범에서 선택</Text>
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={async ()=>{
+                      const { status } = await ImagePicker.requestCameraPermissionsAsync()
+                      if (status !== 'granted') {
+                        Alert.alert('권한 필요','카메라 권한이 필요합니다.')
+                        return
+                      }
+                      const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8, base64: true })
+                      if (!result.canceled && result.assets?.[0]) {
+                        const asset = result.assets[0]
+                        const dataUri = asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri
+                        setDogForm({ ...dogForm, profileImageUrl: dataUri })
+                      }
+                    }}
+                    style={{ paddingHorizontal:12, paddingVertical:10, borderWidth:1, borderColor:'#E5E7EB', borderRadius:8 }}
+                  >
+                    <Text style={{ color:'#374151' }}>사진 촬영</Text>
+                  </TouchableOpacity>
                 </View>
                 <Text style={{ fontSize:12, color:'#6B7280', marginTop:6 }}>추후 AI로 품종/성격 분석 예정</Text>
               </View>
