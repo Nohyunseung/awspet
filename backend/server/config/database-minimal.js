@@ -238,7 +238,12 @@ async function getDogsByUserId(userId) {
       'SELECT * FROM dogs WHERE owner_id = ? ORDER BY created_at DESC',
       [userId]
     )
-    return rows
+    // 프론트엔드에 맞게 필드명 변환
+    const dogs = rows.map(dog => ({
+      ...dog,
+      photo_url: dog.profile_image_url || dog.photo_url || null
+    }))
+    return dogs
   } catch (error) {
     console.error('반려견 목록 조회 실패:', error)
     throw error

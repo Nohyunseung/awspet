@@ -56,13 +56,16 @@ const getApiBaseUrlCandidates = (): string[] => {
   return Array.from(new Set(candidates))
 }
 
-async function pingServer(base: string, timeoutMs = 1200): Promise<boolean> {
+async function pingServer(base: string, timeoutMs = 3000): Promise<boolean> {
   const serverRoot = base.replace(/\/_?api$/, '') || base
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const res = await fetch(`${serverRoot}/`, { signal: controller.signal })
-    return res.ok
+    const res = await fetch(`${serverRoot}/`, { 
+      signal: controller.signal,
+      method: 'HEAD' // HEAD 요청으로 더 빠르게 체크
+    })
+    return res.ok || res.status === 404 // 404도 서버가 응답하는 것으로 간주
   } catch {
     return false
   } finally {
@@ -125,13 +128,31 @@ class ApiService {
     }
     const url = `${this.baseURL}${endpoint}`
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+    }
+
+    // options.headers가 있으면 안전하게 병합
+    if (options.headers) {
+      if (Array.isArray(options.headers)) {
+        options.headers.forEach(([key, value]) => {
+          headers[key] = value
+        })
+      } else if (options.headers instanceof Headers) {
+        options.headers.forEach((value, key) => {
+          headers[key] = value
+        })
+      } else {
+        Object.entries(options.headers).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            headers[key] = value
+          }
+        })
+      }
     }
 
     if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`
+      headers['Authorization'] = `Bearer ${this.token}`
     }
 
     try {

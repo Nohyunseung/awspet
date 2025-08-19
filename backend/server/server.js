@@ -5,7 +5,7 @@ process.on('exit', (code) => console.log('[lifecycle] exit', code))
 process.on('uncaughtException', (err) => { console.error('[lifecycle] uncaughtException', err); process.exit(1) })
 process.on('unhandledRejection', (reason) => { console.error('[lifecycle] unhandledRejection', reason) })
 const express = require('express')
-const http = require('node:http')
+const http = require('http')
 const socketIo = require('socket.io')
 const cors = require('cors')
 const bcrypt = require('bcryptjs')
@@ -43,6 +43,8 @@ const server = http.createServer(app)
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }))
 
 const io = socketIo(server, {
@@ -57,13 +59,66 @@ const REGION = process.env.AWS_REGION || 'ap-northeast-2'
 const MESSAGES_TABLE = process.env.MESSAGES_TABLE || 'PetBuddyMessages'
 const s3Bucket = process.env.S3_BUCKET || 'pet-buddy-uploads'
 
-const s3 = new S3Client({ region: REGION })
+const s3Config = {
+  region: REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  }
+}
+
+const s3 = new S3Client(s3Config)
+
+console.log('🔧 S3 설정:', {
+  region: REGION,
+  bucket: s3Bucket,
+  hasCredentials: !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)
+})
+
+// Base64 이미지를 S3에 업로드하는 함수
+async function uploadBase64ToS3(base64Data, fileName) {
+  try {
+    // data:image/jpeg;base64,/9j/4AAQ... 형태에서 base64 부분만 추출
+    const base64Match = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+    if (!base64Match) {
+      throw new Error('Invalid base64 format')
+    }
+    
+    const contentType = base64Match[1]
+    const base64Content = base64Match[2]
+    const buffer = Buffer.from(base64Content, 'base64')
+    
+    const key = `test0812/${Date.now()}_${fileName || 'photo.jpg'}`
+    const command = new PutObjectCommand({
+      Bucket: s3Bucket,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType
+    })
+    
+    await s3.send(command)
+    const publicUrl = `https://${s3Bucket}.s3.${REGION}.amazonaws.com/${key}`
+    
+    console.log('✅ S3 업로드 성공:', publicUrl)
+    return publicUrl
+  } catch (error) {
+    console.error('❌ S3 업로드 실패:', error)
+    throw error
+  }
+}
 
 // 로컬 캐시(선택): 최근 대화방 메시지 캐시 (Mongo로 이전해도 핫 캐시로 유지 가능)
 const messageHistory = new Map()
 const activeUsers = new Map()
 
 app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true }))
+
+// 요청 로깅 미들웨어 (간소화)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`)
+  next()
+})
 
 // === 최소 기능 Auth ===
 app.post('/api/auth/login', async (req, res) => {
@@ -129,9 +184,31 @@ app.post('/api/dogs', async (req, res) => {
     return res.status(400).json({ success: false, message: '필수 필드 누락 (user_id, name)' })
   }
   try {
-    console.log('🐶 create dog payload:', { user_id, name, breed, personality, birth_date, special_notes, profile_image_url })
-    const result = await createDog({ user_id, name, profile_image_url, breed, personality, birth_date, special_notes })
-    res.json({ success: true, dog: { id: result.dogId, user_id, name, profile_image_url, breed, personality, birth_date, special_notes } })
+    console.log('🐶 강아지 등록 요청:', { user_id, name, breed, hasPhoto: !!profile_image_url })
+    
+    let finalImageUrl = profile_image_url
+    
+    // base64 이미지가 있으면 S3에 업로드 (AWS 자격증명이 있을 때만)
+    if (profile_image_url && profile_image_url.startsWith('data:')) {
+      console.log('📸 base64 이미지 감지됨')
+      if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+        console.log('📸 S3 업로드 시작...')
+        try {
+          finalImageUrl = await uploadBase64ToS3(profile_image_url, `${name}_${Date.now()}.jpg`)
+          console.log('✅ 이미지 업로드 완료:', finalImageUrl)
+        } catch (uploadError) {
+          console.error('❌ 이미지 업로드 실패:', uploadError)
+          // 이미지 업로드 실패해도 강아지 등록은 계속 진행 (base64 그대로 사용)
+          finalImageUrl = profile_image_url
+        }
+      } else {
+        console.log('⚠️ AWS 자격증명 없음, base64 이미지 그대로 사용')
+        finalImageUrl = profile_image_url
+      }
+    }
+    
+    const result = await createDog({ user_id, name, profile_image_url: finalImageUrl, breed, personality, birth_date, special_notes })
+    res.json({ success: true, dog: { id: result.dogId, user_id, name, profile_image_url: finalImageUrl, breed, personality, birth_date, special_notes } })
   } catch (e) {
     console.error('dog create error', e)
     res.status(500).json({ success: false, message: e?.message || '반려견 등록 실패' })
@@ -228,6 +305,72 @@ app.post('/api/sitter-postings', async (req, res) => {
   }
 })
 
+// === AI 품종 분석 ===
+app.post('/api/dogs/:dogId/analyze-breed', async (req, res) => {
+  const { dogId } = req.params;
+  const { imageUrl } = req.body;
+  
+  if (!dogId || !imageUrl) {
+    return res.status(400).json({ 
+      success: false, 
+      error: '필수 파라미터가 누락되었습니다. (dogId, imageUrl)' 
+    });
+  }
+
+  try {
+    console.log(`🤖 AI 품종 분석 요청: dogId=${dogId}, imageUrl=${imageUrl}`);
+    
+    // AWS Lambda 함수 호출
+    const AWS = require('aws-sdk');
+    const lambda = new AWS.Lambda({
+      region: process.env.AWS_REGION || 'ap-northeast-2'
+    });
+
+    // Lambda 함수에 전달할 페이로드
+    const lambdaPayload = {
+      file_name: `temp_analysis_${Date.now()}.jpg`,
+      dog_id: dogId,
+      user_id: 'temp-user',
+      image_data: imageUrl // Base64 이미지 데이터
+    };
+
+    console.log('🚀 Lambda 함수 호출 중...');
+    
+    const lambdaParams = {
+      FunctionName: process.env.LAMBDA_FUNCTION_NAME || 'pet_breed_analyzer',
+      Payload: JSON.stringify(lambdaPayload)
+    };
+
+    const lambdaResult = await lambda.invoke(lambdaParams).promise();
+    
+    if (lambdaResult.StatusCode === 200) {
+      const responsePayload = JSON.parse(lambdaResult.Payload);
+      
+      if (responsePayload.statusCode === 200) {
+        const analysisResult = JSON.parse(responsePayload.body);
+        console.log('✅ Lambda 함수 실행 성공:', analysisResult);
+        
+        res.json({
+          success: true,
+          data: analysisResult
+        });
+      } else {
+        console.error('❌ Lambda 함수 오류:', responsePayload);
+        throw new Error(responsePayload.body || 'Lambda 함수 실행 실패');
+      }
+    } else {
+      throw new Error(`Lambda 함수 호출 실패: StatusCode ${lambdaResult.StatusCode}`);
+    }
+
+  } catch (error) {
+    console.error('❌ AI 품종 분석 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '품종 분석 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 // 기본 엔드포인트
 app.get('/', (req, res) => {
   res.json({ 
@@ -236,11 +379,94 @@ app.get('/', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       dogs: '/api/dogs',
+      pets: '/api/pets', // 새로 추가
       bookings: '/api/bookings',
       sitters: '/api/sitters',
       chat: '/api/conversations'
     }
   })
+})
+
+// === Pet 관리 (Dogs와 동일하지만 새로운 구조) ===
+app.post('/api/pets', async (req, res) => {
+  console.log('🐕 반려견 등록 요청:', req.body)
+  const { user_id, name, breed, personality, birth_date, special_notes } = req.body || {}
+  
+  if (!user_id || !name) {
+    return res.status(400).json({ 
+      success: false, 
+      message: '사용자 ID와 반려견 이름은 필수입니다.' 
+    })
+  }
+
+  try {
+    const dog = await createDog({
+      user_id,
+      name,
+      breed: breed || '품종 미확인',
+      personality: personality || '',
+      birth_date: birth_date || null,
+      special_notes: special_notes || ''
+    })
+
+    console.log('✅ 반려견 등록 성공:', dog)
+    
+    res.status(201).json({
+      success: true,
+      data: {
+        dog_id: dog.dog_id || dog.id,
+        name: dog.name,
+        breed: dog.breed,
+        message: '반려견이 성공적으로 등록되었습니다.'
+      }
+    })
+  } catch (error) {
+    console.error('❌ 반려견 등록 실패:', error)
+    res.status(500).json({
+      success: false,
+      message: '반려견 등록에 실패했습니다.',
+      error: error.message
+    })
+  }
+})
+
+app.get('/api/pets/user/:userId', async (req, res) => {
+  console.log('🐕 사용자 반려견 목록 조회:', req.params.userId)
+  const { userId } = req.params
+  
+  try {
+    const dogs = await getDogsByUserId(userId)
+    console.log('✅ 반려견 목록 조회 성공:', dogs)
+    
+    res.json({
+      success: true,
+      data: dogs
+    })
+  } catch (error) {
+    console.error('❌ 반려견 목록 조회 실패:', error)
+    res.status(500).json({
+      success: false,
+      message: '반려견 목록 조회에 실패했습니다.',
+      error: error.message
+    })
+  }
+})
+
+// 디버깅용: 사용자 목록 조회
+app.get('/api/debug/users', async (req, res) => {
+  try {
+    const [rows] = await pool.execute('SELECT * FROM users LIMIT 10')
+    res.json({
+      success: true,
+      data: rows
+    })
+  } catch (error) {
+    console.error('❌ 사용자 목록 조회 실패:', error)
+    res.status(500).json({
+      success: false,
+      error: error.message
+    })
+  }
 })
 
 // === Conversations (Mongo) ===
@@ -407,6 +633,57 @@ app.post('/api/bookings', async (req, res) => {
   }
 })
 
+// 예약 삭제 API
+app.delete('/api/bookings/:bookingId', async (req, res) => {
+  const { bookingId } = req.params
+  const { user_id } = req.query
+  
+  if (!bookingId || !user_id) {
+    return res.status(400).json({ 
+      success: false, 
+      message: '필수 파라미터가 누락되었습니다. (bookingId, user_id)' 
+    });
+  }
+
+  try {
+    console.log(`🗑️ 예약 삭제 요청: bookingId=${bookingId}, userId=${user_id}`);
+    
+    // 예약 정보 조회 및 권한 확인
+    const pool = require('mysql2/promise').createPool(require('./config/database-minimal').dbConfig)
+    const [rows] = await pool.execute(
+      `SELECT * FROM bookings WHERE booking_id = ? AND owner_id = ? LIMIT 1`, 
+      [bookingId, user_id]
+    )
+    
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: '예약을 찾을 수 없거나 삭제 권한이 없습니다.' 
+      });
+    }
+    
+    // 예약 삭제 (실제로는 상태를 'cancelled'로 변경)
+    const [result] = await pool.execute(
+      `UPDATE bookings SET status = 'cancelled', updated_at = NOW() WHERE booking_id = ? AND owner_id = ?`,
+      [bookingId, user_id]
+    )
+    
+    if (result.affectedRows > 0) {
+      console.log('✅ 예약 삭제 성공');
+      res.json({ success: true, message: '예약이 성공적으로 삭제되었습니다.' });
+    } else {
+      res.status(404).json({ success: false, message: '예약 삭제에 실패했습니다.' });
+    }
+    
+  } catch (error) {
+    console.error('❌ 예약 삭제 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '예약 삭제 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 // 대화방 메시지 히스토리 조회 (MongoDB)
 app.get('/api/conversations/:conversationId/messages', async (req, res) => {
   const { conversationId } = req.params
@@ -428,15 +705,50 @@ app.get('/api/conversations/:conversationId/messages', async (req, res) => {
 // S3 사전서명 URL 발급
 app.post('/api/uploads/sign', async (req, res) => {
   const { fileName, contentType } = req.body || {}
-  if (!fileName || !contentType) return res.status(400).json({ success: false, error: 'Invalid params' })
+  
+  if (!fileName || !contentType) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'fileName과 contentType이 필요합니다' 
+    })
+  }
+
+  // AWS 자격 증명 확인
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    console.error('❌ AWS 자격 증명이 설정되지 않았습니다')
+    return res.status(500).json({
+      success: false,
+      error: 'AWS 자격 증명이 설정되지 않았습니다'
+    })
+  }
+
   try {
-    const key = `uploads/${Date.now()}_${fileName}`
-    const command = new PutObjectCommand({ Bucket: s3Bucket, Key: key, ContentType: contentType })
-    const url = await getSignedUrl(s3, command, { expiresIn: 60 })
-    res.json({ success: true, uploadUrl: url, key })
+    // test0812 폴더에 저장
+    const key = `test0812/${Date.now()}_${fileName}`
+    const command = new PutObjectCommand({ 
+      Bucket: s3Bucket, 
+      Key: key, 
+      ContentType: contentType 
+    })
+    
+    // 사전서명 URL 생성 (5분 만료)
+    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 })
+    const publicUrl = `https://${s3Bucket}.s3.${REGION}.amazonaws.com/${key}`
+    
+    console.log('✅ S3 사전서명 URL 생성 성공:', { key, publicUrl })
+    
+    res.json({ 
+      success: true, 
+      uploadUrl, 
+      key, 
+      publicUrl 
+    })
   } catch (e) {
-    console.error('Presign error', e)
-    res.status(500).json({ success: false, error: 'Failed to sign url' })
+    console.error('❌ S3 사전서명 URL 생성 실패:', e)
+    res.status(500).json({ 
+      success: false, 
+      error: `S3 사전서명 URL 생성 실패: ${e.message}` 
+    })
   }
 })
 
@@ -557,7 +869,6 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3001
 
 console.log('[boot] starting http server on', PORT)
-console.log('[debug] typeof server', typeof server, 'listen', typeof server.listen)
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Pet Buddy Server가 포트 ${PORT}에서 실행 중입니다!`)
   console.log(`💬 Socket.IO 서버가 활성화되었습니다.`)

@@ -52,6 +52,57 @@ const OwnerHomeScreen = ({ navigation }: any) => {
     dangbti: '',
     notes: '',
   })
+  const [isUploading, setIsUploading] = useState(false)
+
+  // S3 이미지 업로드 공통 함수
+  const uploadImageToS3 = async (imageUri: string): Promise<string> => {
+    setIsUploading(true)
+    try {
+      // 이미지 blob 변환
+      const response = await fetch(imageUri)
+      const blob = await response.blob()
+      const contentType = blob.type || 'image/jpeg'
+      const fileName = `dog_${Date.now()}.jpg`
+
+      console.log('📤 S3 업로드 시작:', { fileName, contentType, size: blob.size })
+
+      // 백엔드에서 사전서명 URL 요청
+      const signResp = await apiService.post('/uploads/sign', { fileName, contentType })
+      
+      if (!signResp.success) {
+        throw new Error(signResp.error || '사전서명 URL 요청 실패')
+      }
+
+      const { uploadUrl, publicUrl } = signResp.data
+      if (!uploadUrl || !publicUrl) {
+        throw new Error('업로드 URL이 없습니다')
+      }
+
+      console.log('📝 사전서명 URL 획득:', { uploadUrl: uploadUrl.substring(0, 100) + '...', publicUrl })
+
+      // S3에 직접 업로드
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: blob,
+        headers: {
+          'Content-Type': contentType,
+        },
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error(`S3 업로드 실패: ${uploadResponse.status} ${uploadResponse.statusText}`)
+      }
+
+      console.log('✅ S3 업로드 성공:', publicUrl)
+      return publicUrl
+
+    } catch (error: any) {
+      console.error('❌ S3 업로드 오류:', error)
+      throw error
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   // 내 강아지 프로필들: 기본은 + 버튼만 노출
   const myDogs: any[] = []
@@ -700,40 +751,90 @@ const OwnerHomeScreen = ({ navigation }: any) => {
                     </View>
                   )}
                   <TouchableOpacity
-                    onPress={async ()=>{
+                    onPress={async () => {
+                      if (isUploading) {
+                        Alert.alert('업로드 중', '이미지 업로드가 진행 중입니다. 잠시 기다려주세요.')
+                        return
+                      }
+
                       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
                       if (status !== 'granted') {
-                        Alert.alert('권한 필요','사진 접근 권한이 필요합니다.')
+                        Alert.alert('권한 필요', '사진 접근 권한이 필요합니다.')
                         return
                       }
-                      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8, base64: true })
+
+                      const result = await ImagePicker.launchImageLibraryAsync({ 
+                        mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+                        quality: 0.8, 
+                        base64: false 
+                      })
+                      
                       if (!result.canceled && result.assets?.[0]) {
-                        const asset = result.assets[0]
-                        const dataUri = asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri
-                        setDogForm({ ...dogForm, profileImageUrl: dataUri })
+                        try {
+                          const publicUrl = await uploadImageToS3(result.assets[0].uri)
+                          setDogForm({ ...dogForm, profileImageUrl: publicUrl })
+                          Alert.alert('업로드 완료', '사진이 성공적으로 업로드되었습니다.')
+                        } catch (e: any) {
+                          Alert.alert('업로드 실패', e?.message || '이미지 업로드에 실패했습니다.')
+                        }
                       }
                     }}
-                    style={{ paddingHorizontal:12, paddingVertical:10, borderWidth:1, borderColor:'#E5E7EB', borderRadius:8 }}
+                    style={{ 
+                      paddingHorizontal: 12, 
+                      paddingVertical: 10, 
+                      borderWidth: 1, 
+                      borderColor: isUploading ? '#9CA3AF' : '#E5E7EB', 
+                      borderRadius: 8,
+                      opacity: isUploading ? 0.6 : 1 
+                    }}
+                    disabled={isUploading}
                   >
-                    <Text style={{ color:'#374151' }}>앨범에서 선택</Text>
+                    <Text style={{ color: isUploading ? '#9CA3AF' : '#374151' }}>
+                      {isUploading ? '업로드 중...' : '앨범에서 선택'}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={async ()=>{
-                      const { status } = await ImagePicker.requestCameraPermissionsAsync()
-                      if (status !== 'granted') {
-                        Alert.alert('권한 필요','카메라 권한이 필요합니다.')
+                    onPress={async () => {
+                      if (isUploading) {
+                        Alert.alert('업로드 중', '이미지 업로드가 진행 중입니다. 잠시 기다려주세요.')
                         return
                       }
-                      const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8, base64: true })
+
+                      const { status } = await ImagePicker.requestCameraPermissionsAsync()
+                      if (status !== 'granted') {
+                        Alert.alert('권한 필요', '카메라 권한이 필요합니다.')
+                        return
+                      }
+
+                      const result = await ImagePicker.launchCameraAsync({ 
+                        mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+                        quality: 0.8, 
+                        base64: false 
+                      })
+                      
                       if (!result.canceled && result.assets?.[0]) {
-                        const asset = result.assets[0]
-                        const dataUri = asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri
-                        setDogForm({ ...dogForm, profileImageUrl: dataUri })
+                        try {
+                          const publicUrl = await uploadImageToS3(result.assets[0].uri)
+                          setDogForm({ ...dogForm, profileImageUrl: publicUrl })
+                          Alert.alert('업로드 완료', '사진이 성공적으로 업로드되었습니다.')
+                        } catch (e: any) {
+                          Alert.alert('업로드 실패', e?.message || '이미지 업로드에 실패했습니다.')
+                        }
                       }
                     }}
-                    style={{ paddingHorizontal:12, paddingVertical:10, borderWidth:1, borderColor:'#E5E7EB', borderRadius:8 }}
+                    style={{ 
+                      paddingHorizontal: 12, 
+                      paddingVertical: 10, 
+                      borderWidth: 1, 
+                      borderColor: isUploading ? '#9CA3AF' : '#E5E7EB', 
+                      borderRadius: 8,
+                      opacity: isUploading ? 0.6 : 1 
+                    }}
+                    disabled={isUploading}
                   >
-                    <Text style={{ color:'#374151' }}>사진 촬영</Text>
+                    <Text style={{ color: isUploading ? '#9CA3AF' : '#374151' }}>
+                      {isUploading ? '업로드 중...' : '사진 촬영'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
                 <Text style={{ fontSize:12, color:'#6B7280', marginTop:6 }}>추후 AI로 품종/성격 분석 예정</Text>

@@ -19,10 +19,17 @@
     "@react-native-community/netinfo": "^11.4.1",
     "aws-amplify": "^6.15.5",
     "core-js": "^3.45.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.3",
+    "react-native-aws3": "^0.0.9",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "overrides": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "keywords": [
     "pet",
