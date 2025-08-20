@@ -115,7 +115,9 @@ const SitterChatScreen = ({ navigation }: any) => {
         })}
       >
         <View style={styles.avatarContainer}>
-          <Image source={{ uri: item.recipientAvatar }} style={styles.avatar} />
+          <View style={styles.avatar}>
+            <Text style={styles.avatarEmoji}>🐾</Text>
+          </View>
           {item.unreadCount > 0 && (
             <View style={styles.unreadBadge}>
               <Text style={styles.unreadCount}>{item.unreadCount}</Text>
@@ -230,6 +232,15 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
+    backgroundColor: theme.colors.primaryBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+  },
+  
+  avatarEmoji: {
+    fontSize: 20,
   },
   unreadBadge: {
     position: 'absolute',

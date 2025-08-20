@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { View, Text, SafeAreaView, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
-import { RouteProp, useRoute } from '@react-navigation/native'
+import { View, Text, SafeAreaView, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, StatusBar } from 'react-native'
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import io, { Socket } from 'socket.io-client'
 import { useAuthStore } from '../store/auth'
@@ -19,6 +19,7 @@ type ChatRoomRouteParams = {
 
 const ChatRoom = () => {
   const route = useRoute<RouteProp<ChatRoomRouteParams, 'ChatRoom'>>()
+  const navigation = useNavigation()
   const { user } = useAuthStore()
   const { messages, setMessages, addMessage } = useChatStore()
 
@@ -113,20 +114,73 @@ const ChatRoom = () => {
 
   const renderItem = ({ item }: { item: ChatMessage }) => {
     const mine = String(item.senderId) === String(user?.id)
+    const time = new Date(item.createdAt).toLocaleTimeString('ko-KR', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    })
+    
     return (
       <View style={[styles.messageRow, mine ? styles.rowRight : styles.rowLeft]}>
-        <View style={[styles.bubble, mine ? styles.bubbleRight : styles.bubbleLeft]}>
-          <Text style={[styles.messageText, mine ? styles.textRight : styles.textLeft]}>{item.content}</Text>
-          <Text style={styles.timeText}>{new Date(item.createdAt).toLocaleTimeString().slice(0,5)}</Text>
+        {!mine && (
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>🐕</Text>
+            </View>
+          </View>
+        )}
+        <View style={styles.messageContainer}>
+          {!mine && (
+            <Text style={styles.senderName}>{item.senderName || recipientName}</Text>
+          )}
+          <View style={[styles.bubble, mine ? styles.bubbleRight : styles.bubbleLeft]}>
+            <Text style={[styles.messageText, mine ? styles.textRight : styles.textLeft]}>
+              {item.content}
+            </Text>
+          </View>
+          <Text style={[styles.timeText, mine ? styles.timeRight : styles.timeLeft]}>
+            {time}
+          </Text>
         </View>
+        {mine && (
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>🐾</Text>
+            </View>
+          </View>
+        )}
       </View>
     )
   }
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
+      
+      {/* 개선된 헤더 */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{recipientName}{dogName ? ` • ${dogName}` : ''}</Text>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={24} color={theme.colors.surface} />
+        </TouchableOpacity>
+        
+        <View style={styles.headerCenter}>
+          <View style={styles.headerAvatar}>
+            <Text style={styles.headerAvatarText}>🐕</Text>
+          </View>
+          <View style={styles.headerInfo}>
+            <Text style={styles.headerTitle}>{recipientName}</Text>
+            {dogName && (
+              <Text style={styles.headerSubtitle}>🐾 {dogName}</Text>
+            )}
+          </View>
+        </View>
+        
+        <TouchableOpacity style={styles.headerAction}>
+          <Ionicons name="call-outline" size={22} color={theme.colors.surface} />
+        </TouchableOpacity>
       </View>
       <FlatList
         ref={listRef}
@@ -138,14 +192,35 @@ const ChatRoom = () => {
       />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.inputBar}>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={setInput}
-            placeholder="메시지를 입력하세요"
-          />
-          <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-            <Ionicons name="send" size={20} color="white" />
+          <TouchableOpacity style={styles.attachButton}>
+            <Ionicons name="add-circle-outline" size={24} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
+          
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              value={input}
+              onChangeText={setInput}
+              placeholder="메시지를 입력하세요 🐾"
+              placeholderTextColor={theme.colors.textTertiary}
+              multiline
+              maxLength={1000}
+            />
+            <TouchableOpacity style={styles.emojiButton}>
+              <Text style={styles.emojiText}>😊</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity 
+            style={[styles.sendBtn, input.trim() ? styles.sendBtnActive : styles.sendBtnInactive]} 
+            onPress={handleSend}
+            disabled={!input.trim()}
+          >
+            <Ionicons 
+              name="send" 
+              size={20} 
+              color={input.trim() ? theme.colors.surface : theme.colors.textTertiary} 
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -154,23 +229,236 @@ const ChatRoom = () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
-  header: { paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '{theme.colors.border}' },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: '{theme.colors.textPrimary}' },
-  list: { flex: 1 },
-  messageRow: { paddingHorizontal: 12, marginVertical: 6, flexDirection: 'row' },
-  rowLeft: { justifyContent: 'flex-start' },
-  rowRight: { justifyContent: 'flex-end' },
-  bubble: { maxWidth: '75%', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
-  bubbleLeft: { backgroundColor: '{theme.colors.secondaryBg}', borderTopLeftRadius: 2 },
-  bubbleRight: { backgroundColor: '{theme.colors.primary}', borderTopRightRadius: 2 },
-  messageText: { fontSize: 14 },
-  textLeft: { color: '{theme.colors.textPrimary}' },
-  textRight: { color: 'white' },
-  timeText: { marginTop: 4, fontSize: 10, color: '{theme.colors.textTertiary}', textAlign: 'right' },
-  inputBar: { flexDirection: 'row', alignItems: 'center', padding: 8, borderTopWidth: 1, borderTopColor: '{theme.colors.border}' },
-  input: { flex: 1, borderWidth: 1, borderColor: '{theme.colors.border}', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8 },
-  sendBtn: { backgroundColor: '{theme.colors.primary}', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
+  // 컨테이너
+  container: { 
+    flex: 1, 
+    backgroundColor: theme.colors.background,
+  },
+  
+  // 헤더 스타일
+  header: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    ...theme.shadows.md,
+  },
+  
+  backButton: {
+    padding: theme.spacing.xs,
+  },
+  
+  headerCenter: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: theme.spacing.md,
+  },
+  
+  headerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.sm,
+  },
+  
+  headerAvatarText: {
+    fontSize: 18,
+  },
+  
+  headerInfo: {
+    flex: 1,
+  },
+  
+  headerTitle: { 
+    fontSize: theme.fontSize.lg,
+    fontWeight: 'bold',
+    color: theme.colors.surface,
+  },
+  
+  headerSubtitle: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.surface,
+    opacity: 0.8,
+    marginTop: 2,
+  },
+  
+  headerAction: {
+    padding: theme.spacing.xs,
+  },
+  
+  // 메시지 리스트
+  list: { 
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    paddingTop: theme.spacing.sm,
+  },
+  
+  // 메시지 스타일
+  messageRow: { 
+    paddingHorizontal: theme.spacing.md,
+    marginVertical: theme.spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  
+  rowLeft: { 
+    justifyContent: 'flex-start',
+  },
+  
+  rowRight: { 
+    justifyContent: 'flex-end',
+  },
+  
+  avatarContainer: {
+    marginHorizontal: theme.spacing.xs,
+  },
+  
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.primaryBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  
+  avatarText: {
+    fontSize: 14,
+  },
+  
+  messageContainer: {
+    maxWidth: '75%',
+    marginHorizontal: theme.spacing.xs,
+  },
+  
+  senderName: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.textSecondary,
+    marginBottom: 4,
+    marginLeft: theme.spacing.xs,
+  },
+  
+  bubble: { 
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    ...theme.shadows.sm,
+  },
+  
+  bubbleLeft: { 
+    backgroundColor: theme.colors.surface,
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  
+  bubbleRight: { 
+    backgroundColor: theme.colors.primary,
+    borderBottomRightRadius: 4,
+  },
+  
+  messageText: { 
+    fontSize: theme.fontSize.md,
+    lineHeight: 20,
+  },
+  
+  textLeft: { 
+    color: theme.colors.textPrimary,
+  },
+  
+  textRight: { 
+    color: theme.colors.surface,
+  },
+  
+  timeText: { 
+    marginTop: 4,
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.textTertiary,
+  },
+  
+  timeLeft: {
+    textAlign: 'left',
+    marginLeft: theme.spacing.xs,
+  },
+  
+  timeRight: {
+    textAlign: 'right',
+    marginRight: theme.spacing.xs,
+  },
+  
+  // 입력창 스타일
+  inputBar: { 
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: theme.colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    ...theme.shadows.sm,
+  },
+  
+  attachButton: {
+    padding: theme.spacing.xs,
+    marginRight: theme.spacing.xs,
+  },
+  
+  inputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.xl,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    marginHorizontal: theme.spacing.xs,
+    maxHeight: 100,
+  },
+  
+  input: { 
+    flex: 1,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textPrimary,
+    paddingVertical: theme.spacing.xs,
+    maxHeight: 80,
+  },
+  
+  emojiButton: {
+    padding: theme.spacing.xs,
+    marginLeft: theme.spacing.xs,
+  },
+  
+  emojiText: {
+    fontSize: 18,
+  },
+  
+  sendBtn: { 
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: theme.spacing.xs,
+    ...theme.shadows.sm,
+  },
+  
+  sendBtnActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  
+  sendBtnInactive: {
+    backgroundColor: theme.colors.border,
+  },
 })
 
 export default ChatRoom
