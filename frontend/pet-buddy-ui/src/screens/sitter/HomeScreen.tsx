@@ -180,12 +180,30 @@ const SitterHomeScreen = ({ navigation }: any) => {
           <Text style={styles.userName}>{user?.fullName}님</Text>
         </View>
         <View style={styles.headerRight}>
-          <View style={{ flexDirection: 'row', backgroundColor: '{theme.colors.border}', borderRadius: 9999, padding: 4, marginRight: 8 }}>
-            <TouchableOpacity onPress={() => setActiveRole('owner')} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9999, backgroundColor: activeRole==='owner'?'white':'transparent' }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: activeRole==='owner' ? '{theme.colors.textPrimary}':'{theme.colors.textSecondary}' }}>견주</Text>
+          <View style={commonStyles.roleToggleContainer}>
+            <TouchableOpacity 
+              onPress={() => setActiveRole('owner')} 
+              style={[
+                commonStyles.roleToggleButton,
+                activeRole === 'owner' ? commonStyles.activeRoleButton : commonStyles.inactiveRoleButton
+              ]}
+            >
+              <Text style={[
+                commonStyles.roleToggleText,
+                activeRole === 'owner' ? commonStyles.activeRoleText : commonStyles.inactiveRoleText
+              ]}>견주</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveRole('sitter')} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9999, backgroundColor: activeRole==='sitter'?'white':'transparent' }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: activeRole==='sitter' ? '{theme.colors.textPrimary}':'{theme.colors.textSecondary}' }}>시터</Text>
+            <TouchableOpacity 
+              onPress={() => setActiveRole('sitter')} 
+              style={[
+                commonStyles.roleToggleButton,
+                activeRole === 'sitter' ? commonStyles.activeRoleButton : commonStyles.inactiveRoleButton
+              ]}
+            >
+              <Text style={[
+                commonStyles.roleToggleText,
+                activeRole === 'sitter' ? commonStyles.activeRoleText : commonStyles.inactiveRoleText
+              ]}>시터</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.notificationButton}>

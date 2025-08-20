@@ -389,18 +389,30 @@ const OwnerHomeScreen = ({ navigation }: any) => {
         </View>
         <View style={styles.headerRight}>
           {/* 역할 전환 토글 */}
-          <View style={styles.roleToggle}>
-            <TouchableOpacity
-              style={[styles.roleToggleButton, activeRole === 'owner' && styles.roleToggleActive]}
-              onPress={() => setActiveRole('owner')}
+          <View style={commonStyles.roleToggleContainer}>
+            <TouchableOpacity 
+              onPress={() => setActiveRole('owner')} 
+              style={[
+                commonStyles.roleToggleButton,
+                activeRole === 'owner' ? commonStyles.activeRoleButton : commonStyles.inactiveRoleButton
+              ]}
             >
-              <Text style={[styles.roleToggleText, activeRole === 'owner' && styles.roleToggleTextActive]}>견주</Text>
+              <Text style={[
+                commonStyles.roleToggleText,
+                activeRole === 'owner' ? commonStyles.activeRoleText : commonStyles.inactiveRoleText
+              ]}>견주</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.roleToggleButton, activeRole === 'sitter' && styles.roleToggleActive]}
-              onPress={() => setActiveRole('sitter')}
+            <TouchableOpacity 
+              onPress={() => setActiveRole('sitter')} 
+              style={[
+                commonStyles.roleToggleButton,
+                activeRole === 'sitter' ? commonStyles.activeRoleButton : commonStyles.inactiveRoleButton
+              ]}
             >
-              <Text style={[styles.roleToggleText, activeRole === 'sitter' && styles.roleToggleTextActive]}>시터</Text>
+              <Text style={[
+                commonStyles.roleToggleText,
+                activeRole === 'sitter' ? commonStyles.activeRoleText : commonStyles.inactiveRoleText
+              ]}>시터</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
@@ -1118,33 +1130,6 @@ const styles = StyleSheet.create({
   notificationButton: {
     padding: theme.spacing.xs,
   },
-    roleToggle: {
-      flexDirection: 'row',
-      backgroundColor: theme.colors.secondaryBg,
-      borderRadius: theme.borderRadius.round,
-      padding: theme.spacing.xs,
-      marginRight: theme.spacing.sm,
-    },
-    roleToggleButton: {
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: theme.spacing.xs,
-      borderRadius: theme.borderRadius.round,
-    },
-    roleToggleActive: {
-      backgroundColor: theme.colors.surface,
-      borderWidth: 1,
-      borderColor: theme.colors.primary,
-      ...theme.shadows.sm,
-    },
-    roleToggleText: {
-      fontSize: theme.fontSize.sm,
-      color: theme.colors.textSecondary,
-      fontWeight: '600',
-    },
-    roleToggleTextActive: {
-      color: theme.colors.primary,
-      fontWeight: 'bold',
-    },
   content: {
     flex: 1,
   },

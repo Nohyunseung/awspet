@@ -13,6 +13,8 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../store/auth'
+import { theme } from '../styles/theme'
+import { commonStyles } from '../styles/commonStyles'
 
 const RegisterScreen = ({ navigation }: any) => {
   const [formData, setFormData] = useState({
@@ -87,7 +89,7 @@ const RegisterScreen = ({ navigation }: any) => {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>이메일</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="mail-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <Ionicons name="mail-outline" size={20} color="{theme.colors.textTertiary}" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="이메일을 입력하세요"
@@ -104,7 +106,7 @@ const RegisterScreen = ({ navigation }: any) => {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>전화번호 (선택사항)</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="call-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <Ionicons name="call-outline" size={20} color="{theme.colors.textTertiary}" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="010-1234-5678"
@@ -119,7 +121,7 @@ const RegisterScreen = ({ navigation }: any) => {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>비밀번호</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <Ionicons name="lock-closed-outline" size={20} color="{theme.colors.textTertiary}" style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { paddingRight: 50 }]}
                   placeholder="비밀번호를 입력하세요"
@@ -136,7 +138,7 @@ const RegisterScreen = ({ navigation }: any) => {
                   <Ionicons 
                     name={showPassword ? "eye-off-outline" : "eye-outline"} 
                     size={20} 
-                    color="#9CA3AF" 
+                    color="{theme.colors.textTertiary}" 
                   />
                 </TouchableOpacity>
               </View>
@@ -146,7 +148,7 @@ const RegisterScreen = ({ navigation }: any) => {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>비밀번호 확인</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <Ionicons name="lock-closed-outline" size={20} color="{theme.colors.textTertiary}" style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { paddingRight: 50 }]}
                   placeholder="비밀번호를 다시 입력하세요"
@@ -163,7 +165,7 @@ const RegisterScreen = ({ navigation }: any) => {
                   <Ionicons 
                     name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
                     size={20} 
-                    color="#9CA3AF" 
+                    color="{theme.colors.textTertiary}" 
                   />
                 </TouchableOpacity>
               </View>
@@ -199,7 +201,7 @@ const RegisterScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEF7EE',
+    backgroundColor: '{theme.colors.background}',
   },
   content: {
     flex: 1,
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f97316',
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -220,12 +222,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
     textAlign: 'center',
   },
   formContainer: {
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   inputWrapper: {
@@ -260,7 +262,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: '{theme.colors.border}',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingLeft: 40,
@@ -289,10 +291,10 @@ const styles = StyleSheet.create({
   roleText: {
     marginLeft: 8,
     fontSize: 14,
-    color: '#374151',
+    color: '{theme.colors.textSecondary}',
   },
   registerButton: {
-    backgroundColor: '#f97316',
+    backgroundColor: theme.colors.primary,
     height: 44,
     borderRadius: 8,
     justifyContent: 'center',
@@ -300,7 +302,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   registerButtonDisabled: {
-    backgroundColor: '#FCD34D',
+    backgroundColor: '{theme.colors.primaryLight}',
     opacity: 0.7,
   },
   registerButtonText: {
@@ -315,11 +317,11 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
   },
   loginLink: {
     fontSize: 14,
-    color: '#f97316',
+    color: '{theme.colors.primary}',
     fontWeight: '600',
   },
 })

@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useAuthStore } from '../store/auth'
+import { theme } from '../styles/theme'
 import LoginScreen from '../screens/LoginScreen'
 import RegisterScreen from '../screens/RegisterScreen'
 import OwnerHomeScreen from '../screens/owner/HomeScreen'

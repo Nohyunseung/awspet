@@ -12,6 +12,8 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../store/auth'
+import { theme } from '../styles/theme'
+import { commonStyles } from '../styles/commonStyles'
 
 const LoginScreen = ({ navigation }: any) => {
   const [formData, setFormData] = useState({
@@ -54,7 +56,7 @@ const LoginScreen = ({ navigation }: any) => {
         {/* 로고 및 제목 */}
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <Ionicons name="heart" size={32} color="white" />
+            <Ionicons name="paw" size={32} color="white" />
           </View>
           <Text style={styles.title}>Pet Buddy</Text>
           <Text style={styles.subtitle}>반려견과 시터를 연결하는 특별한 서비스</Text>
@@ -66,7 +68,7 @@ const LoginScreen = ({ navigation }: any) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>이메일</Text>
             <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color={theme.colors.textTertiary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="이메일을 입력하세요"
@@ -83,7 +85,7 @@ const LoginScreen = ({ navigation }: any) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>비밀번호</Text>
             <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color={theme.colors.textTertiary} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { paddingRight: 50 }]}
                 placeholder="비밀번호를 입력하세요"
@@ -100,7 +102,7 @@ const LoginScreen = ({ navigation }: any) => {
                 <Ionicons 
                   name={showPassword ? "eye-off-outline" : "eye-outline"} 
                   size={20} 
-                  color="#9CA3AF" 
+                  color={theme.colors.textTertiary} 
                 />
               </TouchableOpacity>
             </View>
@@ -133,58 +135,53 @@ const LoginScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEF7EE',
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: theme.spacing.lg,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: theme.spacing.xxl,
   },
   logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#f97316',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.lg,
   },
   title: {
-    fontSize: 32,
+    fontSize: theme.fontSize.display,
     fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 8,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: theme.fontSize.lg,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
+    lineHeight: 24,
   },
   formContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing.lg,
+    ...theme.shadows.lg,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: theme.spacing.lg,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 4,
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.xs,
   },
   inputWrapper: {
     position: 'relative',
@@ -193,56 +190,58 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingLeft: 40,
-    fontSize: 16,
-    backgroundColor: 'white',
+    height: 52,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.md,
+    paddingLeft: 44,
+    fontSize: theme.fontSize.lg,
+    color: theme.colors.textPrimary,
+    backgroundColor: theme.colors.surface,
   },
   inputIcon: {
     position: 'absolute',
-    left: 12,
+    left: theme.spacing.md,
     zIndex: 1,
   },
   eyeIcon: {
     position: 'absolute',
-    right: 12,
+    right: theme.spacing.md,
     zIndex: 1,
-    padding: 4,
+    padding: theme.spacing.xs,
   },
   loginButton: {
-    backgroundColor: '#f97316',
-    height: 48,
-    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    height: 52,
+    borderRadius: theme.borderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: theme.spacing.md,
+    ...theme.shadows.md,
   },
   loginButtonDisabled: {
-    backgroundColor: '#FCD34D',
+    backgroundColor: theme.colors.primaryLight,
     opacity: 0.7,
   },
   loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: theme.colors.surface,
+    fontSize: theme.fontSize.lg,
+    fontWeight: 'bold',
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: theme.spacing.lg,
   },
   registerText: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
   },
   registerLink: {
-    fontSize: 14,
-    color: '#f97316',
-    fontWeight: '600',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
   },
 })
 

@@ -336,6 +336,42 @@ export const commonStyles = StyleSheet.create({
     borderColor: theme.colors.borderLight,
     ...theme.shadows.lg,
   },
+
+  // 역할 전환 버튼 스타일
+  roleToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.border,
+    borderRadius: 9999,
+    padding: 4,
+    marginRight: theme.spacing.sm,
+  },
+
+  roleToggleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 9999,
+  },
+
+  activeRoleButton: {
+    backgroundColor: theme.colors.surface,
+  },
+
+  inactiveRoleButton: {
+    backgroundColor: 'transparent',
+  },
+
+  roleToggleText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  activeRoleText: {
+    color: theme.colors.textPrimary,
+  },
+
+  inactiveRoleText: {
+    color: theme.colors.textSecondary,
+  },
 })
 
 // 특별한 강아지 테마 스타일

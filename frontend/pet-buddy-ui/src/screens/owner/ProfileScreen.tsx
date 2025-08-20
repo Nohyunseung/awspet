@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../../store/auth'
+import { theme } from '../../styles/theme'
 
 const OwnerProfileScreen = ({ navigation }: any) => {
   const { user, signOut, activeRole, setActiveRole } = useAuthStore()
@@ -91,9 +92,9 @@ const OwnerProfileScreen = ({ navigation }: any) => {
                 <Ionicons 
                   name="swap-horizontal" 
                   size={20} 
-                  color={activeRole === 'owner' ? '#0ea5e9' : '{theme.colors.primary}'} 
+                  color={activeRole === 'owner' ? theme.colors.secondary : theme.colors.primary} 
                 />
-                <Text style={[styles.roleToggleText, { color: activeRole === 'owner' ? '#0ea5e9' : '{theme.colors.primary}' }]}>
+                <Text style={[styles.roleToggleText, { color: activeRole === 'owner' ? theme.colors.secondary : theme.colors.primary }]}>
                   {activeRole === 'owner' ? '시터 모드로 전환' : '견주 모드로 전환'}
                 </Text>
               </TouchableOpacity>

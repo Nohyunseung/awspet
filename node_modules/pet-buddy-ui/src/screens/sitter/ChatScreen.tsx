@@ -13,6 +13,7 @@ import { Swipeable } from 'react-native-gesture-handler'
 import { useChatStore } from '../../store/chat'
 import { useAuthStore } from '../../store/auth'
 import { apiService } from '../../services/api'
+import { theme } from '../../styles/theme'
 
 const SitterChatScreen = ({ navigation }: any) => {
   const { user } = useAuthStore()
@@ -72,8 +73,8 @@ const SitterChatScreen = ({ navigation }: any) => {
     switch (status) {
       case 'CONFIRMED': return '#10B981'
       case 'PENDING': return '#F59E0B'
-      case 'COMPLETED': return '#6B7280'
-      default: return '#9CA3AF'
+      case 'COMPLETED': return '{theme.colors.textSecondary}'
+      default: return '{theme.colors.textTertiary}'
     }
   }
 
@@ -157,10 +158,10 @@ const SitterChatScreen = ({ navigation }: any) => {
         <Text style={styles.headerTitle}>채팅</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="search-outline" size={24} color="#374151" />
+            <Ionicons name="search-outline" size={24} color="{theme.colors.textSecondary}" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="add-outline" size={24} color="#374151" />
+            <Ionicons name="add-outline" size={24} color="{theme.colors.textSecondary}" />
           </TouchableOpacity>
         </View>
       </View>
@@ -168,7 +169,7 @@ const SitterChatScreen = ({ navigation }: any) => {
       {/* 대화 목록 */}
       {conversations.length === 0 ? (
         <View style={{ padding: 16 }}>
-          <Text style={{ color: '#6B7280' }}>대화가 없습니다. 예약이 생성되면 대화를 시작해보세요.</Text>
+          <Text style={{ color: '{theme.colors.textSecondary}' }}>대화가 없습니다. 예약이 생성되면 대화를 시작해보세요.</Text>
         </View>
       ) : (
         <FlatList
@@ -187,7 +188,7 @@ const SitterChatScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '{theme.colors.background}',
   },
   header: {
     flexDirection: 'row',
@@ -197,12 +198,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '{theme.colors.border}',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
   },
   headerActions: {
     flexDirection: 'row',
@@ -263,11 +264,11 @@ const styles = StyleSheet.create({
   recipientName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
   },
   dogName: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
     marginLeft: 4,
   },
   metaContainer: {
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '{theme.colors.textTertiary}',
     marginBottom: 4,
   },
   statusBadge: {
@@ -293,15 +294,15 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   unreadMessage: {
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
     fontWeight: '500',
   },
   readMessage: {
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
   },
   separator: {
     height: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '{theme.colors.secondaryBg}',
     marginLeft: 76,
   },
 })
