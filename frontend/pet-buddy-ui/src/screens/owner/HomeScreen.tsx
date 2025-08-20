@@ -17,6 +17,8 @@ import * as ImagePicker from 'expo-image-picker'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../../store/auth'
 import { apiService } from '../../services/api'
+import { theme } from '../../styles/theme'
+import { commonStyles } from '../../styles/commonStyles'
 
 const { width } = Dimensions.get('window')
 
@@ -426,11 +428,11 @@ const OwnerHomeScreen = ({ navigation }: any) => {
                   item.isAddButton && styles.addProfileCircle
                 ]}>
                   {item.isAddButton ? (
-                    <Ionicons name="add" size={24} color="#f97316" />
+                    <Ionicons name="add" size={24} color={theme.colors.primary} />
                   ) : item.photo_url ? (
                     <Image source={{ uri: item.photo_url }} style={styles.dogProfilePhoto} />
                   ) : (
-                    <Text style={{ color:'#f97316', fontWeight:'700' }}>{String(item.name || '?').slice(0,1)}</Text>
+                    <Text style={{ color: theme.colors.primary, fontWeight:'700' }}>{String(item.name || '?').slice(0,1)}</Text>
                   )}
                 </View>
                 <Text style={styles.dogProfileName} numberOfLines={1}>
@@ -496,7 +498,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               <TouchableOpacity key={String(job.post_id || job.job_id)} style={styles.sitterCard} onPress={() => openJobDetail(job)}>
                 <View style={styles.sitterInfo}>
                   <View style={styles.sitterAvatar}>
-                    <Ionicons name="briefcase-outline" size={22} color="#f97316" />
+                    <Ionicons name="briefcase-outline" size={22} color={theme.colors.primary} />
                   </View>
                   <View style={styles.sitterDetails}>
                     <View style={styles.sitterHeader}>
@@ -553,7 +555,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
                           paddingVertical: 8,
                           borderRadius: 16,
                           borderWidth: 1,
-                          borderColor: jobForm.dogId === d.id ? '#f97316' : '#D1D5DB',
+                          borderColor: jobForm.dogId === d.id ? '{theme.colors.primary}' : '#D1D5DB',
                           marginRight: 8,
                           backgroundColor: jobForm.dogId === d.id ? '#FEF7EE' : 'white',
                         }}
@@ -693,12 +695,6 @@ const OwnerHomeScreen = ({ navigation }: any) => {
             <View style={styles.modalSection}>
               <Text style={styles.modalSectionTitle}>기본 정보</Text>
 
-              {/* 현재 사용자 정보 표시 (디버그/확인용) */}
-              <View style={{ backgroundColor:'#F3F4F6', borderRadius:8, padding:12, marginBottom:12 }}>
-                <Text style={{ fontSize:12, color:'#6B7280' }}>현재 사용자</Text>
-                <Text style={{ fontSize:14, color:'#111827' }}>ID: {user?.id || '로그인 필요'}</Text>
-                <Text style={{ fontSize:14, color:'#111827' }}>Email: {user?.email || '-'}</Text>
-              </View>
 
               <View style={styles.modalField}>
                 <Text style={styles.modalFieldLabel}>이름 (필수)</Text>
@@ -711,7 +707,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               </View>
 
               <View style={styles.modalField}>
-                <Text style={styles.modalFieldLabel}>품종 (선택)</Text>
+                <Text style={styles.modalFieldLabel}>품종</Text>
                 <TextInput
                   style={styles.modalInput}
                   value={dogForm.breed}
@@ -721,7 +717,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               </View>
 
               <View style={styles.modalField}>
-                <Text style={styles.modalFieldLabel}>성격 (선택)</Text>
+                <Text style={styles.modalFieldLabel}>성격</Text>
                 <TextInput
                   style={styles.modalInput}
                   value={dogForm.personality}
@@ -731,7 +727,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               </View>
 
               <View style={styles.modalField}>
-                <Text style={styles.modalFieldLabel}>생일 (선택, YYYY-MM-DD)</Text>
+                <Text style={styles.modalFieldLabel}>생일 (YYYY-MM-DD)</Text>
                 <TextInput
                   style={styles.modalInput}
                   value={dogForm.birthDate}
@@ -741,7 +737,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               </View>
 
               <View style={styles.modalField}>
-                <Text style={styles.modalFieldLabel}>사진 (선택)</Text>
+                <Text style={styles.modalFieldLabel}>사진</Text>
                 <View style={{ flexDirection:'row', alignItems:'center', gap:12 }}>
                   {dogForm.profileImageUrl ? (
                     <Image source={{ uri: dogForm.profileImageUrl }} style={{ width:56, height:56, borderRadius:28, borderWidth:1, borderColor:'#E5E7EB' }} />
@@ -841,7 +837,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               </View>
 
               <View style={styles.modalField}>
-                <Text style={styles.modalFieldLabel}>특이사항 (선택)</Text>
+                <Text style={styles.modalFieldLabel}>특이사항</Text>
                 <TextInput
                   style={[styles.modalInput, styles.modalTextArea]}
                   value={dogForm.notes}
@@ -919,7 +915,7 @@ const OwnerHomeScreen = ({ navigation }: any) => {
               style={styles.modalEditButton}
               onPress={() => setIsEditing(!isEditing)}
             >
-              <Ionicons name={isEditing ? "checkmark" : "pencil"} size={20} color="#f97316" />
+              <Ionicons name={isEditing ? "checkmark" : "pencil"} size={20} color="{theme.colors.primary}" />
               <Text style={styles.modalEditText}>
                 {isEditing ? '완료' : '편집'}
               </Text>
@@ -1089,29 +1085,30 @@ const OwnerHomeScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'white',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.border,
+    ...theme.shadows.sm,
   },
   headerLeft: {
     flex: 1,
   },
   greeting: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
   },
   userName: {
-    fontSize: 20,
+    fontSize: theme.fontSize.xl,
     fontWeight: 'bold',
-    color: '#111827',
+    color: theme.colors.textPrimary,
     marginTop: 2,
   },
   headerRight: {
@@ -1119,63 +1116,67 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   notificationButton: {
-    padding: 4,
+    padding: theme.spacing.xs,
   },
     roleToggle: {
       flexDirection: 'row',
-      backgroundColor: '#F3F4F6',
-      borderRadius: 9999,
-      padding: 4,
-      marginRight: 8,
+      backgroundColor: theme.colors.secondaryBg,
+      borderRadius: theme.borderRadius.round,
+      padding: theme.spacing.xs,
+      marginRight: theme.spacing.sm,
     },
     roleToggleButton: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 9999,
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.borderRadius.round,
     },
     roleToggleActive: {
-      backgroundColor: 'white',
+      backgroundColor: theme.colors.surface,
       borderWidth: 1,
-      borderColor: '#E5E7EB',
+      borderColor: theme.colors.primary,
+      ...theme.shadows.sm,
     },
     roleToggleText: {
-      fontSize: 12,
-      color: '#6B7280',
+      fontSize: theme.fontSize.sm,
+      color: theme.colors.textSecondary,
       fontWeight: '600',
     },
     roleToggleTextActive: {
-      color: '#111827',
+      color: theme.colors.primary,
+      fontWeight: 'bold',
     },
   content: {
     flex: 1,
   },
   // 강아지 프로필 (인스타 스토리 스타일)
   dogProfilesContainer: {
-    backgroundColor: 'white',
-    paddingVertical: 16,
+    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing.md,
+    ...theme.shadows.sm,
   },
   dogProfilesList: {
-    paddingHorizontal: 16,
+    paddingHorizontal: theme.spacing.md,
   },
   dogProfileItem: {
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: theme.spacing.md,
     width: 70,
   },
   dogProfileCircle: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#FEF7EE',
+    backgroundColor: theme.colors.primaryBg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    borderWidth: 2,
-    borderColor: '#f97316',
+    marginBottom: theme.spacing.sm,
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
+    ...theme.shadows.md,
   },
   addProfileCircle: {
-    backgroundColor: '#F3F4F6',
-    borderColor: '#D1D5DB',
+    backgroundColor: theme.colors.secondaryBg,
+    borderColor: theme.colors.secondary,
     borderStyle: 'dashed',
   },
   dogProfilePhoto: {
@@ -1184,112 +1185,115 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   dogProfileName: {
-    fontSize: 12,
-    color: '#374151',
-    fontWeight: '500',
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textPrimary,
+    fontWeight: '600',
     textAlign: 'center',
   },
   // 일정 블록 (좌우 스와이프)
   schedulesContainer: {
-    backgroundColor: 'white',
-    paddingVertical: 20,
-    marginTop: 8,
+    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing.lg,
+    marginTop: theme.spacing.sm,
+    ...theme.shadows.sm,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: theme.fontSize.xl,
     fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 16,
-    paddingHorizontal: 16,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
   },
   schedulesList: {
-    paddingHorizontal: 16,
+    paddingHorizontal: theme.spacing.md,
   },
   scheduleCard: {
     width: width * 0.75,
-    backgroundColor: '#FAFAFA',
-    borderRadius: 16,
-    padding: 16,
-    marginRight: 12,
+    backgroundColor: theme.colors.surfaceLight,
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing.md,
+    marginRight: theme.spacing.sm,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: theme.colors.borderLight,
+    ...theme.shadows.md,
   },
   scheduleHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing.sm,
   },
   scheduleService: {
-    fontSize: 16,
+    fontSize: theme.fontSize.lg,
     fontWeight: 'bold',
-    color: '#111827',
+    color: theme.colors.textPrimary,
   },
   scheduleStatus: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.lg,
   },
   confirmedStatus: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: theme.colors.successBg,
   },
   pendingStatus: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: theme.colors.warningBg,
   },
   scheduleStatusText: {
-    fontSize: 10,
+    fontSize: theme.fontSize.xs,
     fontWeight: '600',
   },
   confirmedStatusText: {
-    color: '#065F46',
+    color: theme.colors.success,
   },
   pendingStatusText: {
-    color: '#92400E',
+    color: theme.colors.warning,
   },
   scheduleDog: {
-    fontSize: 14,
-    color: '#374151',
-    marginBottom: 4,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.xs,
   },
   scheduleSitter: {
-    fontSize: 14,
-    color: '#374151',
-    marginBottom: 4,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.xs,
   },
   scheduleTime: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 4,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.xs,
   },
   scheduleLocation: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textTertiary,
   },
   // 시터 목록 (상하 스크롤)
   sittersContainer: {
-    backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    marginTop: 8,
-    marginBottom: 20,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.sm,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   seeAllText: {
-    fontSize: 14,
-    color: '#f97316',
-    fontWeight: '600',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
   },
   sitterCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: theme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.divider,
   },
   sitterInfo: {
     flex: 1,
@@ -1300,10 +1304,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#FEF7EE',
+    backgroundColor: theme.colors.primaryBg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: theme.spacing.sm,
+    ...theme.shadows.sm,
   },
   sitterAvatarImage: {
     width: 56,
@@ -1320,9 +1325,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   sitterName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: theme.fontSize.lg,
+    fontWeight: 'bold',
+    color: theme.colors.textPrimary,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -1334,20 +1339,20 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   reviewCount: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textTertiary,
     marginLeft: 2,
   },
   sitterMeta: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 6,
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.xs,
   },
   sitterRate: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#f97316',
-    marginBottom: 8,
+    fontSize: theme.fontSize.md,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.sm,
   },
   specialtiesContainer: {
     flexDirection: 'row',
@@ -1363,32 +1368,33 @@ const styles = StyleSheet.create({
   },
   specialtyText: {
     fontSize: 10,
-    color: '#f97316',
+    color: '{theme.colors.primary}',
     fontWeight: '500',
   },
   // 모달 스타일
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'white',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.border,
+    ...theme.shadows.sm,
   },
   modalCloseButton: {
-    padding: 4,
+    padding: theme.spacing.xs,
     width: 60,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: theme.fontSize.xl,
     fontWeight: 'bold',
-    color: '#111827',
+    color: theme.colors.textPrimary,
     flex: 1,
     textAlign: 'center',
   },
@@ -1399,14 +1405,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalEditText: {
-    fontSize: 14,
-    color: '#f97316',
-    fontWeight: '600',
-    marginLeft: 4,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+    marginLeft: theme.spacing.xs,
   },
   modalContent: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: theme.spacing.md,
   },
   modalPhotoContainer: {
     alignItems: 'center',
@@ -1418,7 +1424,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: '#f97316',
+    borderColor: '{theme.colors.primary}',
   },
   changePhotoButton: {
     position: 'absolute',
@@ -1427,44 +1433,46 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f97316',
+    backgroundColor: '{theme.colors.primary}',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalSection: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.md,
   },
   modalSectionTitle: {
-    fontSize: 16,
+    fontSize: theme.fontSize.lg,
     fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 16,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.md,
   },
   modalField: {
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   modalFieldLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    fontSize: theme.fontSize.md,
+    fontWeight: 'bold',
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.sm,
   },
   modalFieldValue: {
-    fontSize: 16,
-    color: '#111827',
+    fontSize: theme.fontSize.lg,
+    color: theme.colors.textPrimary,
     lineHeight: 22,
   },
   modalInput: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    fontSize: theme.fontSize.lg,
+    color: theme.colors.textPrimary,
+    backgroundColor: theme.colors.surface,
   },
   modalTextArea: {
     height: 80,
@@ -1474,15 +1482,16 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   modalSaveButton: {
-    backgroundColor: '#f97316',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
+    ...theme.shadows.md,
   },
   modalSaveButtonText: {
-    fontSize: 16,
+    fontSize: theme.fontSize.lg,
     fontWeight: 'bold',
-    color: 'white',
+    color: theme.colors.surface,
   },
   modalDeleteButton: {
     flexDirection: 'row',
@@ -1516,11 +1525,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#f97316',
+    borderColor: '{theme.colors.primary}',
   },
   dangbtiTestText: {
     fontSize: 12,
-    color: '#f97316',
+    color: '{theme.colors.primary}',
     fontWeight: '600',
   },
   dangbtiDisplayContainer: {
@@ -1528,7 +1537,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dangbtiBadge: {
-    backgroundColor: '#f97316',
+    backgroundColor: '{theme.colors.primary}',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,

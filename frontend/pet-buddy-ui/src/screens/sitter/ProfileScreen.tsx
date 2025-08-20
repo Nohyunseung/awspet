@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   activeOwnerRole: {
-    backgroundColor: '#f97316',
+    backgroundColor: '{theme.colors.primary}',
   },
   activeSitterRole: {
     backgroundColor: '#0ea5e9',

@@ -6,6 +6,8 @@ import io, { Socket } from 'socket.io-client'
 import { useAuthStore } from '../store/auth'
 import { useChatStore, ChatMessage } from '../store/chat'
 import { apiService } from '../services/api'
+import { theme } from '../styles/theme'
+import { commonStyles } from '../styles/commonStyles'
 
 type ChatRoomRouteParams = {
   ChatRoom: {
@@ -153,22 +155,22 @@ const ChatRoom = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'white' },
-  header: { paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  header: { paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '{theme.colors.border}' },
+  headerTitle: { fontSize: 16, fontWeight: '600', color: '{theme.colors.textPrimary}' },
   list: { flex: 1 },
   messageRow: { paddingHorizontal: 12, marginVertical: 6, flexDirection: 'row' },
   rowLeft: { justifyContent: 'flex-start' },
   rowRight: { justifyContent: 'flex-end' },
   bubble: { maxWidth: '75%', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
-  bubbleLeft: { backgroundColor: '#F3F4F6', borderTopLeftRadius: 2 },
-  bubbleRight: { backgroundColor: '#f97316', borderTopRightRadius: 2 },
+  bubbleLeft: { backgroundColor: '{theme.colors.secondaryBg}', borderTopLeftRadius: 2 },
+  bubbleRight: { backgroundColor: '{theme.colors.primary}', borderTopRightRadius: 2 },
   messageText: { fontSize: 14 },
-  textLeft: { color: '#111827' },
+  textLeft: { color: '{theme.colors.textPrimary}' },
   textRight: { color: 'white' },
-  timeText: { marginTop: 4, fontSize: 10, color: '#9CA3AF', textAlign: 'right' },
-  inputBar: { flexDirection: 'row', alignItems: 'center', padding: 8, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8 },
-  sendBtn: { backgroundColor: '#f97316', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
+  timeText: { marginTop: 4, fontSize: 10, color: '{theme.colors.textTertiary}', textAlign: 'right' },
+  inputBar: { flexDirection: 'row', alignItems: 'center', padding: 8, borderTopWidth: 1, borderTopColor: '{theme.colors.border}' },
+  input: { flex: 1, borderWidth: 1, borderColor: '{theme.colors.border}', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8 },
+  sendBtn: { backgroundColor: '{theme.colors.primary}', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
 })
 
 export default ChatRoom

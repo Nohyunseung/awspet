@@ -58,7 +58,7 @@ const OwnerProfileScreen = ({ navigation }: any) => {
               <Text style={styles.userPhone}>{user?.phone}</Text>
             </View>
             <TouchableOpacity style={styles.editButton}>
-              <Ionicons name="pencil-outline" size={20} color="#f97316" />
+              <Ionicons name="pencil-outline" size={20} color="{theme.colors.primary}" />
             </TouchableOpacity>
           </View>
 
@@ -68,7 +68,7 @@ const OwnerProfileScreen = ({ navigation }: any) => {
             <View style={styles.rolesList}>
               {user?.roleOwner && (
                 <View style={[styles.roleTag, activeRole === 'owner' ? styles.activeOwnerRole : styles.inactiveRole]}>
-                  <Ionicons name="home" size={16} color={activeRole === 'owner' ? 'white' : '#f97316'} />
+                  <Ionicons name="home" size={16} color={activeRole === 'owner' ? 'white' : '{theme.colors.primary}'} />
                   <Text style={[styles.roleTagText, activeRole === 'owner' ? styles.activeRoleText : styles.inactiveRoleText]}>
                     반려견 견주
                   </Text>
@@ -91,9 +91,9 @@ const OwnerProfileScreen = ({ navigation }: any) => {
                 <Ionicons 
                   name="swap-horizontal" 
                   size={20} 
-                  color={activeRole === 'owner' ? '#0ea5e9' : '#f97316'} 
+                  color={activeRole === 'owner' ? '#0ea5e9' : '{theme.colors.primary}'} 
                 />
-                <Text style={[styles.roleToggleText, { color: activeRole === 'owner' ? '#0ea5e9' : '#f97316' }]}>
+                <Text style={[styles.roleToggleText, { color: activeRole === 'owner' ? '#0ea5e9' : '{theme.colors.primary}' }]}>
                   {activeRole === 'owner' ? '시터 모드로 전환' : '견주 모드로 전환'}
                 </Text>
               </TouchableOpacity>
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   activeOwnerRole: {
-    backgroundColor: '#f97316',
+    backgroundColor: '{theme.colors.primary}',
   },
   activeSitterRole: {
     backgroundColor: '#0ea5e9',

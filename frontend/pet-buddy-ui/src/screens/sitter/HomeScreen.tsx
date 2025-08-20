@@ -16,6 +16,8 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../../store/auth'
 import { apiService } from '../../services/api'
+import { theme } from '../../styles/theme'
+import { commonStyles } from '../../styles/commonStyles'
 
 const { width } = Dimensions.get('window')
 
@@ -178,16 +180,16 @@ const SitterHomeScreen = ({ navigation }: any) => {
           <Text style={styles.userName}>{user?.fullName}님</Text>
         </View>
         <View style={styles.headerRight}>
-          <View style={{ flexDirection: 'row', backgroundColor: '#E5E7EB', borderRadius: 9999, padding: 4, marginRight: 8 }}>
+          <View style={{ flexDirection: 'row', backgroundColor: '{theme.colors.border}', borderRadius: 9999, padding: 4, marginRight: 8 }}>
             <TouchableOpacity onPress={() => setActiveRole('owner')} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9999, backgroundColor: activeRole==='owner'?'white':'transparent' }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: activeRole==='owner' ? '#111827':'#6B7280' }}>견주</Text>
+              <Text style={{ fontSize: 12, fontWeight: '600', color: activeRole==='owner' ? '{theme.colors.textPrimary}':'{theme.colors.textSecondary}' }}>견주</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setActiveRole('sitter')} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9999, backgroundColor: activeRole==='sitter'?'white':'transparent' }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: activeRole==='sitter' ? '#111827':'#6B7280' }}>시터</Text>
+              <Text style={{ fontSize: 12, fontWeight: '600', color: activeRole==='sitter' ? '{theme.colors.textPrimary}':'{theme.colors.textSecondary}' }}>시터</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color="#374151" />
+            <Ionicons name="notifications-outline" size={24} color="{theme.colors.textSecondary}" />
           </TouchableOpacity>
         </View>
       </View>
@@ -226,7 +228,7 @@ const SitterHomeScreen = ({ navigation }: any) => {
             />
           ) : (
             <View style={styles.emptySchedule}>
-              <Ionicons name="calendar-outline" size={48} color="#D1D5DB" />
+              <Ionicons name="calendar-outline" size={48} color="{theme.colors.border}" />
               <Text style={styles.emptyText}>오늘 예정된 일정이 없습니다</Text>
             </View>
           )}
@@ -237,11 +239,11 @@ const SitterHomeScreen = ({ navigation }: any) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={styles.sectionTitle}>새로운 매칭 요청 ({ownerJobs.length})</Text>
             <TouchableOpacity onPress={() => setIsPostModalVisible(true)}>
-              <Text style={{ color: '#0ea5e9', fontWeight: '600' }}>+ 시터 공고 등록</Text>
+              <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>+ 시터 공고 등록</Text>
             </TouchableOpacity>
           </View>
           {loadingJobs ? (
-            <Text style={{ paddingHorizontal: 16, color: '#6B7280' }}>불러오는 중...</Text>
+            <Text style={{ paddingHorizontal: 16, color: '{theme.colors.textSecondary}' }}>불러오는 중...</Text>
           ) : ownerJobs.map((job) => (
             <View key={job.job_id} style={styles.requestCard}>
               <View style={styles.requestHeader}>
@@ -311,22 +313,114 @@ const SitterHomeScreen = ({ navigation }: any) => {
 
       {/* 시터 공고 등록 모달 (간단 폼) */}
       {isPostModalVisible && (
-        <View style={{ position:'absolute', left:0, right:0, top:0, bottom:0, backgroundColor:'rgba(0,0,0,0.2)', justifyContent:'center', alignItems:'center' }}>
-          <View style={{ backgroundColor:'white', width:'90%', borderRadius:12, padding:16 }}>
-            <Text style={{ fontSize:16, fontWeight:'bold', marginBottom:12 }}>시터 공고 등록</Text>
-            <TextInput placeholder="제목" value={postForm.title} onChangeText={(t)=>setPostForm({...postForm,title:t})} style={{ borderWidth:1, borderColor:'#D1D5DB', borderRadius:8, padding:10, marginBottom:8 }} />
-            <TextInput placeholder="위치(선택)" value={postForm.location} onChangeText={(t)=>setPostForm({...postForm,location:t})} style={{ borderWidth:1, borderColor:'#D1D5DB', borderRadius:8, padding:10, marginBottom:8 }} />
-            <View style={{ flexDirection:'row', gap:8 }}>
-              <TextInput placeholder="가능 시작(YYYY-MM-DD)" value={postForm.availableFrom} onChangeText={(t)=>setPostForm({...postForm,availableFrom:t})} style={{ flex:1, borderWidth:1, borderColor:'#D1D5DB', borderRadius:8, padding:10, marginBottom:8 }} />
-              <TextInput placeholder="가능 종료(YYYY-MM-DD)" value={postForm.availableTo} onChangeText={(t)=>setPostForm({...postForm,availableTo:t})} style={{ flex:1, borderWidth:1, borderColor:'#D1D5DB', borderRadius:8, padding:10, marginBottom:8 }} />
+        <View style={{ position:'absolute', left:0, right:0, top:0, bottom:0, backgroundColor:'rgba(45, 27, 20, 0.5)', justifyContent:'center', alignItems:'center' }}>
+          <View style={{ backgroundColor: theme.colors.surface, width:'90%', borderRadius: theme.borderRadius.xl, padding: theme.spacing.lg, ...theme.shadows.lg }}>
+            <Text style={{ fontSize: theme.fontSize.xl, fontWeight:'bold', marginBottom: theme.spacing.md, color: theme.colors.textPrimary }}>🐾 시터 공고 등록</Text>
+            <TextInput 
+              placeholder="제목 (예: 주말 강아지 돌봄 가능)" 
+              value={postForm.title} 
+              onChangeText={(t)=>setPostForm({...postForm,title:t})} 
+              style={{ 
+                borderWidth: 2, 
+                borderColor: theme.colors.border, 
+                borderRadius: theme.borderRadius.lg, 
+                padding: theme.spacing.md, 
+                marginBottom: theme.spacing.sm,
+                fontSize: theme.fontSize.md,
+                backgroundColor: theme.colors.surface
+              }} 
+            />
+            <TextInput 
+              placeholder="위치 (예: 서울 강남구)" 
+              value={postForm.location} 
+              onChangeText={(t)=>setPostForm({...postForm,location:t})} 
+              style={{ 
+                borderWidth: 2, 
+                borderColor: theme.colors.border, 
+                borderRadius: theme.borderRadius.lg, 
+                padding: theme.spacing.md, 
+                marginBottom: theme.spacing.sm,
+                fontSize: theme.fontSize.md,
+                backgroundColor: theme.colors.surface
+              }} 
+            />
+            <View style={{ flexDirection:'row', gap: theme.spacing.sm }}>
+              <TextInput 
+                placeholder="시작일" 
+                value={postForm.availableFrom} 
+                onChangeText={(t)=>setPostForm({...postForm,availableFrom:t})} 
+                style={{ 
+                  flex: 1, 
+                  borderWidth: 2, 
+                  borderColor: theme.colors.border, 
+                  borderRadius: theme.borderRadius.lg, 
+                  padding: theme.spacing.md, 
+                  marginBottom: theme.spacing.sm,
+                  fontSize: theme.fontSize.md,
+                  backgroundColor: theme.colors.surface
+                }} 
+              />
+              <TextInput 
+                placeholder="종료일" 
+                value={postForm.availableTo} 
+                onChangeText={(t)=>setPostForm({...postForm,availableTo:t})} 
+                style={{ 
+                  flex: 1, 
+                  borderWidth: 2, 
+                  borderColor: theme.colors.border, 
+                  borderRadius: theme.borderRadius.lg, 
+                  padding: theme.spacing.md, 
+                  marginBottom: theme.spacing.sm,
+                  fontSize: theme.fontSize.md,
+                  backgroundColor: theme.colors.surface
+                }} 
+              />
             </View>
-            <TextInput placeholder="설명(선택)" value={postForm.description} onChangeText={(t)=>setPostForm({...postForm,description:t})} multiline numberOfLines={3} style={{ borderWidth:1, borderColor:'#D1D5DB', borderRadius:8, padding:10, marginBottom:12 }} />
-            <View style={{ flexDirection:'row', justifyContent:'flex-end', gap:8 }}>
-              <TouchableOpacity onPress={()=>setIsPostModalVisible(false)} style={{ paddingHorizontal:14, paddingVertical:10 }}>
-                <Text style={{ color:'#6B7280' }}>취소</Text>
+            <TextInput 
+              placeholder="상세 설명 (선택사항)" 
+              value={postForm.description} 
+              onChangeText={(t)=>setPostForm({...postForm,description:t})} 
+              multiline 
+              numberOfLines={3} 
+              style={{ 
+                borderWidth: 2, 
+                borderColor: theme.colors.border, 
+                borderRadius: theme.borderRadius.lg, 
+                padding: theme.spacing.md, 
+                marginBottom: theme.spacing.md,
+                fontSize: theme.fontSize.md,
+                backgroundColor: theme.colors.surface,
+                textAlignVertical: 'top'
+              }} 
+            />
+            <View style={{ flexDirection:'row', justifyContent:'flex-end', gap: theme.spacing.sm }}>
+              <TouchableOpacity 
+                onPress={()=>setIsPostModalVisible(false)} 
+                style={{ 
+                  paddingHorizontal: theme.spacing.lg, 
+                  paddingVertical: theme.spacing.md,
+                  borderRadius: theme.borderRadius.lg,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border
+                }}
+              >
+                <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>취소</Text>
               </TouchableOpacity>
-              <TouchableOpacity disabled={posting} onPress={handleCreateSitterPost} style={{ backgroundColor: posting?'#93C5FD':'#0ea5e9', paddingHorizontal:14, paddingVertical:10, borderRadius:8 }}>
-                <Text style={{ color:'white', fontWeight:'600' }}>{posting?'등록 중...':'등록'}</Text>
+              <TouchableOpacity 
+                disabled={posting} 
+                onPress={handleCreateSitterPost} 
+                style={{ 
+                  backgroundColor: posting ? theme.colors.primaryLight : theme.colors.primary, 
+                  paddingHorizontal: theme.spacing.lg, 
+                  paddingVertical: theme.spacing.md, 
+                  borderRadius: theme.borderRadius.lg,
+                  ...theme.shadows.sm,
+                  opacity: posting ? 0.7 : 1
+                }}
+              >
+                <Text style={{ color: theme.colors.surface, fontWeight: 'bold', fontSize: theme.fontSize.md }}>
+                  {posting ? '🐾 등록 중...' : '🐾 등록하기'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -339,29 +433,30 @@ const SitterHomeScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'white',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.border,
+    ...theme.shadows.sm,
   },
   headerLeft: {
     flex: 1,
   },
   greeting: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
   },
   userName: {
-    fontSize: 20,
+    fontSize: theme.fontSize.xl,
     fontWeight: 'bold',
-    color: '#111827',
+    color: theme.colors.textPrimary,
     marginTop: 2,
   },
   headerRight: {
@@ -380,12 +475,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: theme.fontSize.sm,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.colors.textSecondary,
   },
   notificationButton: {
-    padding: 4,
+    padding: theme.spacing.xs,
   },
   content: {
     flex: 1,
@@ -409,12 +504,12 @@ const styles = StyleSheet.create({
   statusTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
     marginBottom: 4,
   },
   statusDescription: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
   },
   // 일정 블록 (좌우 스와이프)
   schedulesContainer: {
@@ -425,7 +520,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
     marginBottom: 16,
     paddingHorizontal: 16,
   },
@@ -450,7 +545,7 @@ const styles = StyleSheet.create({
   scheduleService: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
   },
   confirmedStatus: {
     backgroundColor: '#D1FAE5',
@@ -465,28 +560,28 @@ const styles = StyleSheet.create({
   },
   scheduleOwner: {
     fontSize: 14,
-    color: '#374151',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   scheduleDog: {
     fontSize: 14,
-    color: '#374151',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   scheduleTime: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   scheduleLocation: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '{theme.colors.textTertiary}',
     marginBottom: 4,
   },
   scheduleEarning: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0ea5e9',
+    color: '{theme.colors.primary}',
   },
   emptySchedule: {
     alignItems: 'center',
@@ -495,7 +590,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '{theme.colors.textTertiary}',
     marginTop: 12,
   },
   // 매칭 요청 블록 (상하 스크롤)
@@ -508,7 +603,7 @@ const styles = StyleSheet.create({
   },
   requestCard: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '{theme.colors.border}',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -551,12 +646,12 @@ const styles = StyleSheet.create({
   requestDogName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
     marginBottom: 2,
   },
   requestDogBreed: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
   },
   requestOwnerDetails: {
     flex: 1,
@@ -564,15 +659,15 @@ const styles = StyleSheet.create({
   requestOwnerName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
   },
   requestTime: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '{theme.colors.textTertiary}',
   },
   requestDistance: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
     fontWeight: '500',
   },
   requestContent: {
@@ -581,33 +676,33 @@ const styles = StyleSheet.create({
   requestService: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '{theme.colors.textPrimary}',
     marginBottom: 8,
   },
   requestDogInfo: {
     fontSize: 14,
-    color: '#374151',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   requestSchedule: {
     fontSize: 14,
-    color: '#374151',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   requestLocation: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
     marginBottom: 4,
   },
   requestEarning: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#0ea5e9',
+    color: '{theme.colors.primary}',
     marginBottom: 8,
   },
   requestNotes: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
     fontStyle: 'italic',
     backgroundColor: '#F8FAFC',
     padding: 8,
@@ -628,11 +723,11 @@ const styles = StyleSheet.create({
   declineButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    color: '{theme.colors.textSecondary}',
   },
   acceptButton: {
     flex: 2,
-    backgroundColor: '#0ea5e9',
+    backgroundColor: '{theme.colors.primary}',
     paddingVertical: 12,
     borderRadius: 8,
     marginLeft: 8,
