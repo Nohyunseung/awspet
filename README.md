@@ -4,6 +4,7 @@
 
 ### 구성
 - 프론트엔드: Expo + React Native + React Navigation + Zustand + React Query
+  - 🐾 강아지 친화적 디자인 시스템 (코랄/브라운 테마)
 - 백엔드: Node.js + Express, Socket.IO, MySQL2, Mongoose(MongoDB), AWS S3 업로드
 - 데이터 저장소
   - MySQL: 사용자/반려견/예약/공고 등 관계형 데이터
@@ -33,6 +34,7 @@
       │  ├─ navigation/               # 네비게이션 스택/탭
       │  ├─ services/                # API 클라이언트 등
       │  ├─ store/                    # Zustand 스토어
+      │  ├─ styles/                   # 🐾 테마 시스템 (theme.ts, commonStyles.ts)
       │  └─ types/                    # 타입 정의
       ├─ App.tsx
       └─ package.json
@@ -200,6 +202,31 @@ EXPO_PUBLIC_API_URL=http://localhost:3001
   - 로컬 MongoDB 실행 여부 확인, `MONGODB_URI` 점검
 - S3 업로드 실패
   - `AWS_REGION`, `S3_BUCKET` 환경 변수와 자격증명 확인(자격증명은 AWS 기본 자격 체인 사용)
+
+## 🐾 디자인 시스템
+
+Pet Buddy는 강아지 친화적인 따뜻한 디자인 시스템을 사용합니다.
+
+### 테마 색상
+- **Primary**: 코랄 오렌지 (`#FF8C69`) - 따뜻하고 친근한 느낌
+- **Secondary**: 브라운 계열 - 자연스럽고 안정감 있는 색상
+- **배경**: 부드러운 크림/아이보리 톤
+
+### 사용법
+```typescript
+import { theme } from '../styles/theme'
+import { commonStyles } from '../styles/commonStyles'
+
+// 색상 사용
+backgroundColor: theme.colors.primary
+
+// 공통 스타일 적용
+style={commonStyles.primaryButton}
+```
+
+### 테마 파일
+- `src/styles/theme.ts`: 색상, 폰트 크기, 간격, 그림자 등 디자인 토큰
+- `src/styles/commonStyles.ts`: 재사용 가능한 컴포넌트 스타일
 
 ## 라이선스
 
